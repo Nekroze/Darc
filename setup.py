@@ -1,35 +1,34 @@
-__author__="Nekroze"
-__date__ ="$21/02/2012 7:43:11 AM$"
+__author__='Taylor "Nekroze" Lawson'
 
 from setuptools import setup
 
 setup (
-	name = 'Darc',
-	version = '1.1',
+name = 'Darc',
+version = '1.2',
 
-	py_modules = ["darc"],
-	data_files = ['license.txt'],
-	
-	author = 'Taylor "Nekroze" Lawson',
-	author_email = 'nekroze@eturnilnetwork.com',
-	url = 'https://github.com/Nekroze/Darc/wiki',
-	download_url = 'http://pypi.python.org/pypi/Darc/',
-	license = 'MIT',
-	platforms = ['win32', 'unix'],
-	classifiers = [
-		'Development Status :: 4 - Beta',
-		'Intended Audience :: Developers',
-		'Operating System :: Microsoft',
-		'Operating System :: POSIX',
-		'Programming Language :: Python :: 2 :: Only',
-		'Topic :: Games/Entertainment',
-		'Topic :: Multimedia',
-		'Topic :: Security :: Cryptography',
-		'Topic :: Software Development :: Libraries :: Python Modules',
-		'Topic :: System :: Archiving'
-	  ],
+py_modules = ["darc"],
+data_files = ['license.txt'],
 
-	description = 'Darc is an archiving system for use in media projects that allows developers to contain and use their data files from .darc files that store data in a bz2 compressed and AES encrypted (optional) format.',
+author = 'Taylor "Nekroze" Lawson',
+author_email = 'nekroze@eturnilnetwork.com',
+url = 'https://github.com/Nekroze/Darc/wiki',
+download_url = 'http://pypi.python.org/pypi/Darc/',
+license = 'MIT',
+platforms = ['win32', 'unix'],
+classifiers = [
+'Development Status :: 4 - Beta',
+'Intended Audience :: Developers',
+'Operating System :: Microsoft',
+'Operating System :: POSIX',
+'Programming Language :: Python :: 2 :: Only',
+'Topic :: Games/Entertainment',
+'Topic :: Multimedia',
+'Topic :: Security :: Cryptography',
+'Topic :: Software Development :: Libraries :: Python Modules',
+'Topic :: System :: Archiving'
+],
+
+description = 'Darc is an archiving system for use in media projects that allows developers to contain and use their data files from .darc files that store data in a bz2 compressed and AES encrypted (optional) format.',
 long_description= """Darc allows data files for media projects (images, sounds, videos etc.) to be stored in special container files called a .darc which compresses, encrypts, hashes and then stores each file for verification and use at a later date.
 
 There are several benefits to using Darc for your projects data files:

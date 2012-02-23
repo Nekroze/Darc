@@ -1,5 +1,6 @@
 ## @package darc
 #darc allows simple data container creation and access with AES Encryption and bz2 Compression along with sha256 file hashing.
+__author__='Taylor "Nekroze" Lawson'
 import os
 import fnmatch
 import random
@@ -305,17 +306,69 @@ def add_file(path, filename, darcname):
 class DummyFile:
 	def __init__(self, data):
 		self.data = data
+		self.end = len(self.data)
 		self.pos = 0
+
+	def __iter__(self):
+		return self
 
 	def read(self, size=None):
 		start = self.pos
-		end = len(self.data) - 1
+		end = self.end - 1
 
 		if size is not None:
-			end = min(len(self.data), self.pos + size)
+			end = min(self.end, self.pos + size)
 
 		self.pos = end
 		return self.data[start:end]
+
+	def next(self):
+		output = self.readline()
+		if output == None:
+			raise StopIteration
+		else:
+			return output
+
+	def readline(self, size=None):
+		bytecount = 0
+		output = ""
+		if self.pos == self.end:
+			return None
+		while True:
+			buffer = self.read(1)
+			if buffer == "\n":
+				break
+			elif self.pos == self.end:
+				output += buffer
+				break
+			elif buffer == "\r":
+				next = self.read(1)
+				if next == "\n":
+					break
+				else:
+					self.seek(-1, 1)
+			else:
+				output += buffer
+			if size != None:
+				bytecount += 1
+				if bytecount == size:
+					break
+		return output
+
+	def readlines(self, sizehint=None):
+		output = []
+		linecount = 0
+		while True:
+			read = self.readline()
+			if sizehint != None:
+				linecount += 1
+				if linecount == sizehint:
+					break
+			if read == False:
+				break
+			else:
+				output.append(read)
+		return output
 
 	def seek(self, offset, whence=0):
 		if whence == 0:
@@ -323,7 +376,7 @@ class DummyFile:
 		elif whence == 1:
 			self.pos = self.pos + offset
 		elif whence == 2:
-			self.pos = len(data) + offset
+			self.pos = self.end + offset
 
 
 	def tell(self):
