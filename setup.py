@@ -8,11 +8,11 @@ setup (
 	version = '1.0',
 
 	py_modules = ["darc"],
-	data_files = ['demo/*', 'license.txt'],
+	data_files = ['license.txt'],
 	
 	author = 'Taylor "Nekroze" Lawson',
 	author_email = 'nekroze@eturnilnetwork.com',
-	url = 'https://github.com/Nekroze/Darc.git',
+	url = 'https://github.com/Nekroze/Darc/wiki',
 	download_url = 'http://pypi.python.org/pypi/Darc/',
 	license = 'MIT',
 	platforms = ['win32', 'unix'],
@@ -48,6 +48,6 @@ Using Darc is meant to be as pain free as possible and be able to be implemented
 
 The override functionality allows the end-user of your project to customize their experience by placing a file in your data directory that mirrors the path and name of the archived file so that it will be loaded instead.
 
-For more information go to https://github.com/Nekroze/Darc.git and check out the wiki.""",
+For more information go to the darc wiki https://github.com/Nekroze/Darc/wiki and go read through the Functions or Demo pages.""",
 
 )
