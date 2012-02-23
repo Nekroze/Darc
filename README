@@ -4,6 +4,7 @@ To Install simply enter into command line:
 python setup.py install
 
 There are several benefits to using Darc for your projects data files:
+
 1: All files are hashed so the integrity of data files can be checked on the end-users machine.
 
 2: All files are compressed with bz2, allowing a reasonable size-speed trade off bz2 can save a good deal of space which can make all the difference on limited space environments.
@@ -19,4 +20,4 @@ Using Darc is meant to be as pain free as possible and be able to be implemented
 
 The override functionality allows the end-user of your project to customize their experience by placing a file in your data directory that mirrors the path and name of the archived file so that it will be loaded instead.
 
-For more information go to https://github.com/Nekroze/Darc.git and check out the wiki.
+For more information go to the darc wiki https://github.com/Nekroze/Darc/wiki and go read through the Functions or Demo pages.

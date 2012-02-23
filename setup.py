@@ -33,6 +33,7 @@ setup (
 long_description= """Darc allows data files for media projects (images, sounds, videos etc.) to be stored in special container files called a .darc which compresses, encrypts, hashes and then stores each file for verification and use at a later date.
 
 There are several benefits to using Darc for your projects data files:
+
 1: All files are hashed so the integrity of data files can be checked on the end-users machine.
 
 2: All files are compressed with bz2, allowing a reasonable size-speed trade off bz2 can save a good deal of space which can make all the difference on limited space environments.
