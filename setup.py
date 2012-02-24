@@ -4,7 +4,7 @@ from setuptools import setup
 
 setup (
 name = 'Darc',
-version = '1.2',
+version = '1.2.1',
 
 py_modules = ["darc"],
 data_files = ['license.txt'],
@@ -13,11 +13,12 @@ author = 'Taylor "Nekroze" Lawson',
 author_email = 'nekroze@eturnilnetwork.com',
 url = 'https://github.com/Nekroze/Darc/wiki',
 download_url = 'http://pypi.python.org/pypi/Darc/',
-license = 'MIT',
+license = 'LGPL',
 platforms = ['win32', 'unix'],
 classifiers = [
 'Development Status :: 4 - Beta',
 'Intended Audience :: Developers',
+'License :: OSI Approved :: GNU Library or Lesser General Public License (LGPL)',
 'Operating System :: Microsoft',
 'Operating System :: POSIX',
 'Programming Language :: Python :: 2 :: Only',
