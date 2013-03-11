@@ -1,68 +1,92 @@
-## @package darc
-#darc allows simple data container creation and access with AES Encryption and bz2 Compression along with sha256 file hashing.
-__author__='Taylor "Nekroze" Lawson'
+"""darc allows simple data container creation and access with AES Encryption and
+bz2 Compression along with sha256 file hashing."""
+__author__ = 'Taylor "Nekroze" Lawson'
+__email__ = 'nekroze@eturnilnetwork.com'
+
 import os
 import fnmatch
 import random
 import struct
 import bz2
 import tarfile
-import cStringIO
 import re
 import hashlib
 import fnmatch
+try:
+    import cStringIO as StringIO
+except ImportError:
+    import io.StringIO as StringIO
 
 try:
     from Crypto.Cipher import AES
 except ImportError:
-    ##Ignore this it is used for compatability with installations that do not have pycrypto.
+    # Ignore this it is used for compatability with installations that do not
+    # have pycrypto. 
     AES = None
 
-##only use set_key(password) to change this.
+# only use set_key(password) to change this.
 key = None
 key = hashlib.sha256("TEST").digest()
-##this value is fine to always remain as is.
+# this value is fine to always remain as is.
 chunksize = 64 * 1024
-##only use set_override(state) to change this.
+# only use set_override(state) to change this.
 override = False
-##only use set_data_dir(dir) to change this.
+# only use set_data_dir(dir) to change this.
 dir_data = "data/"
-##only use set_encryption(state) to change this.
+# only use set_encryption(state) to change this.
 encryption = True
 
-##use this to change the override state, with override enabled anything in your data folder that is outside of a .darc but has the same path and name will override the .darc and load that instead.
+
 def set_override(state):
+    """Use this to change the override state, with override enabled anything in
+    your data folder that is outside of a .darc but has the same path and name
+    will override the .darc and load that instead. 
+    """
     global override
     override = state
 
-##use this to change the data directory, path must be relative to the location of any program you wish to use the .darc files.
+
 def set_data_dir(dir):
+    """use this to change the data directory, path must be relative to the
+    location of any program you wish to use the .darc files.
+    """
     global dir_data
     dir_data = os.path.normpath(dir)
 
-##use this if you wish to switch encryption on or off.
-#determins if encryption is to be used or not, use set_encryption(True) only if you have pycrypto installed and would like to encrypt your archived files.
-#this will return the new state of encryption. If pycrypto is not installed it will always set and return False.
+
 def set_encryption(state):
+    """use this if you wish to switch encryption on or off.
+    determins if encryption is to be used or not, use set_encryption(True) only
+    if you have pycrypto installed and would like to encrypt your archived
+    files. This will return the new state of encryption. If pycrypto is not
+    installed it will always set and return False.
+    """
     global encryption
-    if AES == None:
+    if AES is None:
         encryption = False
         return False
     else:
         encryption = state
         return state
 
-##use this if you wish to change the password for you darc files.
-#input a plaintext password and it is hashed and set as the key for all future encryption.
+
 def set_key(password):
+    """use this if you wish to change the password for you darc files.
+    input a plaintext password and it is hashed and set as the key for all
+    future encryption.
+    """
     global key
     key = hashlib.sha256(password).digest()
 
-##this checks the integrity of all .darc files against their included list of checksums.
-#will return False if any file is damaged else True.
-#will return Darcname if any .darc file contains damage else None.
-#will return Filename if any file is damaged else None.
+
 def check_darc(verbose=False):
+    """This checks the integrity of all .darc files against their included list
+    of checksums.
+    
+    will return False if any file is damaged else True.
+    will return Darcname if any .darc file contains damage else None.
+    will return Filename if any file is damaged else None.
+    """
     for root, dirs, files in os.walk(dir_data):
         darcs = []
         for filename in fnmatch.filter(files, "*.darc"):
@@ -110,30 +134,35 @@ def check_darc(verbose=False):
                             daf.close()
                             darc.close()
                             if verbose:
-                                print "ERROR: Requested file in " + darcname + ".darc has a different signature hash stored for file |" + daffile.name
-                                print "CURRENT: " +  storedhash
-                                print "STORED : " +  hash
+                                print(
+                                    """ERROR: Requested file in {0}.darc has a different signature
+                                    hashstored for file |""".format(darcname, daffile.name))  
+                                print("CURRENT: {0}".format(storedhash))
+                                print("STORED : {0}".format(hash))
                             return False, darcname, daffile.name
                 sigs.close()
                 daf.close()
         darc.close()
         if verbose:
-            print "All .darc archives have been checked with 0 failed file integrity checks."
+            print("All .darc archives have been checked with 0 failed file integrity checks.")
         return True, None, None
 
-##this returns a file from a .darc archive or alternatativly an override file if it exists.
-#if verify is specified as True the hash of the file will be checked and will return None if the hash does not match.
+
 def get_file(path, file, verify=False):
+    """this returns a file from a .darc archive or alternatativly an override
+    file if it exists. if verify is specified as True the hash of the file will be checked and will
+    return None if the hash does not match.
+    """
     if dir_data in path:
         path = os.path.relpath(path)
     else:
         path = os.path.relpath(dir_data + os.sep + path)
     if override:
         if os.path.exists(path + os.sep + file):
-            #file is in data dir as an override
+            # file is in data dir as an override
             return open(path + os.sep + file, "rb")
 
-    #file is in a .darc dead archive
+    # file is in a .darc dead archive
     if os.sep == '\\':
         sep = '\\\\'
     else:
@@ -143,11 +172,11 @@ def get_file(path, file, verify=False):
     dafname = os.path.join(path, file + ".daf")
     dafname = dafname.replace("\\", "/")
 
-    #pull the daf file from the .darc into memory
+    # pull the daf file from the .darc into memory
     outfile = cStringIO.StringIO()
     darc = tarfile.open(dir_data + os.sep + darcname, "r")
     daf = darc.extractfile(dafname)
-    #verify file integrity if asked
+    # verify file integrity if asked
     if verify:
         while True:
             sigs = darc.extractfile("sigs")
@@ -155,11 +184,11 @@ def get_file(path, file, verify=False):
             while True:
                 read = sigs.readline()
                 if read == "":
-                    #requested file has no verified sigs
+                    # requested file has no verified sigs
                     return None
                 sig = re.split("\|", read)
                 if os.path.normpath(sig[0]) == os.path.normpath(daffile.name):
-                    #signature found
+                    # signature found
                     hash = hashlib.sha256()
                     while True:
                         update = daf.read(128)
@@ -168,10 +197,10 @@ def get_file(path, file, verify=False):
                         hash.update(update)
                     hash = hash.hexdigest()
                     if sig[1][0:-1] == hash:
-                        #hash is the same as original
+                        # hash is the same as original
                         break
                     else:
-                        #hash is not the same, file has been damaged
+                        # hash is not the same, file has been damaged
                         sigs.close()
                         daf.close()
                         darc.close()
@@ -195,10 +224,13 @@ def get_file(path, file, verify=False):
     darc.close()
     return DummyFile(outfile.getvalue())
 
-##creates .darc archive(s) from the data directories contents.
-#if clean is specified as True files will be deleted as they are archived into the container.
-#filter is a list of extensions that will be excluded from the archive, it is recomended to use override along with this.
+
 def create_darc(clean=False, filter=[], verbose=False):
+    """Creates .darc archive(s) from the data directories contents.
+    if clean is specified as True files will be deleted as they are archived
+    into the container. filter is a list of extensions that will be excluded
+    from the archive, it is recomended to use override along with this. 
+    """
     for root, dirs, files in os.walk(dir_data):
         darcs = dirs
         if len(darcs) == 0:
@@ -236,16 +268,20 @@ def create_darc(clean=False, filter=[], verbose=False):
     if verbose:
         print "All .darc files have been created."
 
-##adds a specific file into a specified .darc file.
-#use of this function is NOT recommended, create_darc uses this to add files. If appending new items to the .darc archive it is recommended that the entire archive be rebuilt.
-#the darcname must not include file extension.
+
 def add_file(path, filename, darcname):
+    """adds a specific file into a specified .darc file.
+    use of this function is NOT recommended, create_darc uses this to add
+    files.If appending new items to the .darc archive it is recommended that
+    the entire archive be rebuilt. The darcname must not include file
+    extension.
+    """
     if dir_data in path:
         path = os.path.relpath(path)
     else:
         path = os.path.join(dir_data + path)
 
-    #compress file
+    # compress file
     with open(os.path.join(path, filename), 'rb') as infile:
         bz2file = bz2.BZ2File(os.path.join(path, filename) + ".bz2", 'wb')
         while True:
@@ -256,7 +292,7 @@ def add_file(path, filename, darcname):
         bz2file.close()
 
     if encryption:
-        #encrypt file
+        # encrypt file
         iv = ''.join(chr(random.randint(0, 0xFF)) for i in xrange(16))
         encryptor = AES.new(key, AES.MODE_CBC, iv)
         filesize = os.path.getsize(os.path.join(path, filename))
@@ -275,7 +311,7 @@ def add_file(path, filename, darcname):
     else:
         os.rename(os.path.join(path, filename) + ".bz2", os.path.join(path, filename) + ".daf")
 
-    #hash the file for later verification
+    # hash the file for later verification
     hash = hashlib.sha256()
     daf = open(os.path.join(path, filename) + ".daf", "rb")
     while True:
@@ -286,10 +322,10 @@ def add_file(path, filename, darcname):
     hash = hash.hexdigest()
     daf.close()
 
-    #make sure .darc exists
+    # make sure .darc exists
     darc = tarfile.open(os.path.join(dir_data, darcname) + ".darc", "r")
         
-    #Add file to .darc tar
+    # Add file to .darc tar
     darc.extract("sigs")
     darc.close()
     sigs = open("sigs", "a")
@@ -302,6 +338,7 @@ def add_file(path, filename, darcname):
     darc.add(os.path.join(path, filename) + ".daf")
     darc.close()
     os.remove(os.path.join(path, filename) + ".daf")
+
 
 class DummyFile:
     def __init__(self, data):
@@ -378,7 +415,6 @@ class DummyFile:
         elif whence == 2:
             self.pos = self.end + offset
 
-
     def tell(self):
         return self.pos
 
@@ -389,7 +425,7 @@ class DummyFile:
 if __name__ == "__main__":
     from optparse import OptionParser
     import getpass
-    ##this is only used when using darc as a stand alone script.
+    # this is only used when using darc as a stand alone script.
     parser = OptionParser()
     
     parser.add_option("-c", "--clean", action="store_true", dest="CLEAN", default=False, help="Removes all files from their source directory that get archived.")

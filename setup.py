@@ -1,54 +1,165 @@
-__author__='Taylor "Nekroze" Lawson'
-
-from setuptools import setup
-
-setup (
-name = 'Darc',
-version = '1.2.1',
-
-py_modules = ["darc"],
-data_files = ['license.txt'],
-
-author = 'Taylor "Nekroze" Lawson',
-author_email = 'nekroze@eturnilnetwork.com',
-url = 'https://github.com/Nekroze/Darc/wiki',
-download_url = 'http://pypi.python.org/pypi/Darc/',
-license = 'LGPL',
-platforms = ['win32', 'unix'],
-classifiers = [
-'Development Status :: 4 - Beta',
-'Intended Audience :: Developers',
-'License :: OSI Approved :: GNU Library or Lesser General Public License (LGPL)',
-'Operating System :: Microsoft',
-'Operating System :: POSIX',
-'Programming Language :: Python :: 2 :: Only',
-'Topic :: Games/Entertainment',
-'Topic :: Multimedia',
-'Topic :: Security :: Cryptography',
-'Topic :: Software Development :: Libraries :: Python Modules',
-'Topic :: System :: Archiving'
-],
-
-description = 'Darc is an archiving system for use in media projects that allows developers to contain and use their data files from .darc files that store data in a bz2 compressed and AES encrypted (optional) format.',
-long_description= """Darc allows data files for media projects (images, sounds, videos etc.) to be stored in special container files called a .darc which compresses, encrypts, hashes and then stores each file for verification and use at a later date.
-
-There are several benefits to using Darc for your projects data files:
-
-1: All files are hashed so the integrity of data files can be checked on the end-users machine.
-
-2: All files are compressed with bz2, allowing a reasonable size-speed trade off bz2 can save a good deal of space which can make all the difference on limited space environments.
-
-3: All files can be encrypted using AES methods from the pycrypto library to ensure your data is not modified by the user.
-
-4: All files are stored in large single file archives, projects that use many small files can save space wasted by the filesystems cluster size.
-
-5: All files can be loaded using a relative path and filename as if it were really in that path rather then in a .darc archive. This allows Darc to even check if there is a file matching that path and name outside of a .darc file and will load that instead of the one archived solong as override is enabled, allowing your project to be capable of modification by the end-user.
+#!/usr/bin/python
+import re
+import os
+import sys
+import platform
+from distutils.core import setup, Command
 
 
-Using Darc is meant to be as pain free as possible and be able to be implemented with as little effort or change to your code as possible. To this end, using Darc in your project is as simple as calling the darc.get_file() method and telling it the relative path and name of the file you want to load.
+__version__ = '1.0.0'
+__author__ = 'Taylor "Nekroze" Lawson'
+__email__ = 'nekroze@eturnilnetwork.com'
+SOURCE = 'darc'
+TESTDIR = 'test'
+PROJECTNAME = 'darc'
+PROJECTSITE = 'nekroze.eturnilnetwork.com'
+PROJECTDESC = 'Darc is an archiving system for use in media projects that allows developers to contain and use their data files from .darc files that store data in a bz2 compressed and AES encrypted (optional) format.'
+PROJECTLICENSE = 'MIT'
+PLATFORMS = ['*nix', 'Windows']
+TESTER = 'pytest'
 
-The override functionality allows the end-user of your project to customize their experience by placing a file in your data directory that mirrors the path and name of the archived file so that it will be loaded instead.
+EXTENSIONS = []  # DEFINE YOURSELF if compiled extensions are needed
 
-For more information go to the darc wiki https://github.com/Nekroze/Darc/wiki and go read through the Functions or Demo pages.""",
 
+PYTHON = 'python'
+if platform.system() != 'Windows' and sys.version_info[0] == 3:
+    PYTHON = 'python3'
+
+
+class Test(Command):
+    """Run test suite."""
+    description = "Run test suite"
+    user_options = []
+
+    def initialize_options(self):
+        """pass."""
+        pass
+
+    def finalize_options(self):
+        """pass."""
+        pass
+
+    def run(self):
+        """Run unittests."""
+        if TESTER == 'unittest' and os.system(PYTHON + ' -m unittest discover ' + TESTDIR + ' "*.py"'):
+            sys.exit(1)
+        elif TESTER == 'pytest' and os.system('pytest'):
+            sys.exit(1)
+        elif TESTER == 'nose' and os.system('nosetests'):
+            sys.exit(1)
+
+
+class Style(Command):
+    """Check style with pylint."""
+    description = "Run pylint on source code."
+    user_options = []
+
+    def initialize_options(self):
+        """pass."""
+        pass
+
+    def finalize_options(self):
+        """pass."""
+        pass
+
+    def run(self):
+        """Run pylint."""
+        if not os.system('pylint --rcfile=.pylintrc ' + SOURCE):
+            print("Pylint reports no inconsistencies.")
+        else:
+            sys.exit(1)
+
+
+class Prep(Command):
+    """Prepare code by running style check and test suite and freezing."""
+    description = "Run test suite"
+    user_options = []
+
+    def initialize_options(self):
+        """pass."""
+        pass
+
+    def finalize_options(self):
+        """pass."""
+        pass
+
+    def run(self):
+        if os.system(PYTHON + ' setup.py test'):
+            sys.exit(1)
+        if os.system(PYTHON + ' setup.py style'):
+            sys.exit(1)
+
+
+class GitCommit(Command):
+    """Git add and commit with message."""
+    description = "Git commit."
+    user_options = [('message=', 'm', 'Git commit message.')]
+
+    def initialize_options(self):
+        """Set message to None by default."""
+        self.message = None
+
+    def finalize_options(self):
+        """pass."""
+        pass
+
+    def run(self):
+        """Run git add and commit with message if provided."""
+        if os.system('git add .'):
+            sys.exit(1)
+        if self.message is not None:
+            os.system('git commit -a -m "' + self.message + '"')
+        else:
+            os.system('git commit -a')
+
+
+class PyPiUpload(Command):
+    """Update this project at the current version to pypi."""
+    description = "Update pypi."
+    user_options = []
+
+    def initialize_options(self):
+        """pass."""
+        pass
+
+    def finalize_options(self):
+        """pass."""
+        pass
+
+    def run(self):
+        """build an sdist and then upload."""
+        if os.system(PYTHON + ' setup.py sdist upload'):
+            sys.exit(1)
+        print('PyPi Upload successful.')
+
+			
+vRe = re.compile(r'__version__\s*=\s*(\S+)', re.M)
+data = open('setup.py').read()
+
+kwds = {}
+kwds['version'] = eval(vRe.search(data).group(1))
+kwds['description'] = PROJECTDESC
+kwds['long_description'] = open('README.rst').read()
+kwds['license'] = PROJECTLICENSE
+
+
+setup(
+    cmdclass={
+        'style': Style,
+        'test': Test,
+        'prep': Prep,
+        'commit': GitCommit,
+        'pypiup': PyPiUpload},
+
+    name=PROJECTNAME,
+    author=__author__,
+    author_email=__email__,
+    url=PROJECTSITE,
+    platforms=PLATFORMS,
+    packages=[SOURCE],
+    ext_modules = EXTENSIONS,
+    classifiers=[
+        # DEFINE YOURSELF
+    ],
+    **kwds
 )
